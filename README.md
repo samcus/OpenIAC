@@ -1,4 +1,4 @@
-# OpenIAC
+# OpenIaC
 
 A TypeScript-first Infrastructure as Code (IaC) framework built as a pnpm monorepo. Define your infrastructure in JSON, run it from the CLI. One engine, pluggable providers, sequential stacks with context passing between steps.
 
@@ -24,7 +24,7 @@ A TypeScript-first Infrastructure as Code (IaC) framework built as a pnpm monore
 
 ## How It Works
 
-OpenIAC has three layers:
+OpenIaC has three layers:
 
 ```
 JSON Config / Stack      ← the only thing end users touch
@@ -106,7 +106,7 @@ npx iac path/to/config.json
 ## Repository Structure
 
 ```
-OpenIAC/
+OpenIaC/
 ├── .changeset/                  # Versioning config (Changesets)
 ├── packages/
 │   ├── core/                    # @openiac/core — engine, CLI, shared types
@@ -167,8 +167,8 @@ npm install -g pnpm
 ### Install
 
 ```bash
-git clone https://github.com/samuelcuster/OpenIAC
-cd OpenIAC
+git clone https://github.com/samuelcuster/OpenIaC
+cd OpenIaC
 pnpm install
 pnpm build
 ```
@@ -410,7 +410,7 @@ Set `NPM_TOKEN` as a secret in your GitHub repository settings, then uncomment t
 
 ## Environment Variables
 
-Environment variables are **never loaded by OpenIAC itself**. The engine reads directly from `process.env`, so variables must be present before the CLI runs. How you load them is up to you.
+Environment variables are **never loaded by OpenIaC itself**. The engine reads directly from `process.env`, so variables must be present before the CLI runs. How you load them is up to you.
 
 | Variable | Required By | Description |
 |---|---|---|
