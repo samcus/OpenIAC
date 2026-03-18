@@ -1,0 +1,34 @@
+{
+    "name": "<STACK_NAME>",
+    "steps": [
+        {
+            "$docs": "https://docs.stripe.com/api/products/create",
+            "id": "create_product",
+            "provider": "stripe",
+            "resource": "product",
+            "action": "create",
+            "params": {
+                "name": "<PRODUCT_NAME>",
+                "description": "<PRODUCT_DESCRIPTION>",
+                "metadata": {
+                    "internal_product_id": "<YOUR_INTERNAL_ID>"
+                }
+            }
+        },
+        {
+            "$docs": "https://docs.stripe.com/api/prices/create",
+            "id": "create_price",
+            "provider": "stripe",
+            "resource": "price",
+            "action": "create",
+            "params": {
+                "product": "$context.create_product.id",
+                "unit_amount": "<AMOUNT_IN_CENTS>",
+                "currency": "<CURRENCY_CODE>",
+                "recurring": {
+                    "interval": "<INTERVAL>"
+                }
+            }
+        }
+    ]
+}

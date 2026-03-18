@@ -1,0 +1,11 @@
+{
+    "$docs": "https://docs.stripe.com/api/prices/create",
+    "provider": "stripe",
+    "resource": "price",
+    "action": "create",
+    "params": {
+        "product": "<PRODUCT_ID>",
+        "unit_amount": "<AMOUNT_IN_CENTS>",
+        "currency": "<CURRENCY_CODE>"
+    }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@openiac/provider-stripe",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@openiac/core": "workspace:*",
+    "stripe": "^20.4.1"
+  }
+}

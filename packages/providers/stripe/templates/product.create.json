@@ -1,0 +1,13 @@
+{
+    "$docs": "https://docs.stripe.com/api/products/create",
+    "provider": "stripe",
+    "resource": "product",
+    "action": "create",
+    "params": {
+        "name": "<PRODUCT_NAME>",
+        "description": "<PRODUCT_DESCRIPTION>",
+        "metadata": {
+            "internal_product_id": "<YOUR_INTERNAL_ID>"
+        }
+    }
+}

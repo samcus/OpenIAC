@@ -1,0 +1,13 @@
+{
+  "name": "@openiac/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "bin": {
+    "iac": "src/engine.ts"
+  },
+  "dependencies": {
+    "tsx": "^4.0.0"
+  }
+}

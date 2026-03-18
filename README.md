@@ -1,0 +1,381 @@
+# OpenIAC
+
+A TypeScript-first Infrastructure as Code (IaC) framework built as a pnpm monorepo. Define your infrastructure in JSON, run it from the CLI. One engine, pluggable providers, sequential stacks with context passing between steps.
+
+---
+
+## Table of Contents
+
+- [How It Works](#how-it-works)
+- [Repository Structure](#repository-structure)
+- [Packages](#packages)
+- [Getting Started (Monorepo Development)](#getting-started-monorepo-development)
+- [Local Testing](#local-testing)
+- [Configs](#configs)
+- [Stacks](#stacks)
+- [Context Passing Between Steps](#context-passing-between-steps)
+- [Adding a New Resource to an Existing Provider](#adding-a-new-resource-to-an-existing-provider)
+- [Adding a New Provider](#adding-a-new-provider)
+- [Publishing](#publishing)
+- [Environment Variables](#environment-variables)
+
+---
+
+## How It Works
+
+OpenIAC has three layers:
+
+```
+JSON Config / Stack      ← the only thing end users touch
+      ↓
+Engine (@openiac/core)   ← reads the JSON, routes to the right provider + resource + action
+      ↓
+Provider Package         ← calls the actual API (Stripe, AWS, etc.)
+```
+
+A single config file describes **what** to do:
+
+```json
+{
+  "$docs": "https://docs.stripe.com/api/products/create",
+  "provider": "stripe",
+  "resource": "product",
+  "action": "create",
+  "params": {
+    "name": "Standard Widget",
+    "description": "A one-time purchase widget"
+  }
+}
+```
+
+Run it:
+
+```bash
+pnpm iac configs/stripe/product.create.json
+```
+
+That's it. The engine loads `@openiac/provider-stripe`, finds the `product` resource, calls the `create` action with your params, and prints the result.
+
+---
+
+## Repository Structure
+
+```
+OpenIAC/
+├── .changeset/                  # Versioning config (Changesets)
+├── packages/
+│   ├── core/                    # @openiac/core — engine, CLI, shared types
+│   │   └── src/
+│   │       ├── engine.ts        # CLI entrypoint (runs via tsx, no build step needed)
+│   │       ├── types.ts         # Shared interfaces: Resource, Provider, Stack, Context
+│   │       └── index.ts         # Public type exports
+│   └── providers/
+│       └── stripe/              # @openiac/provider-stripe
+│           ├── src/
+│           │   ├── client.ts    # Shared Stripe SDK singleton
+│           │   ├── resources/
+│           │   │   ├── product.ts   # create, list, retrieve, delete
+│           │   │   └── price.ts     # create, list, retrieve, update
+│           │   └── index.ts     # Exports active resources
+│           ├── templates/       # Placeholder configs users copy into their project
+│           │   ├── product.create.json
+│           │   ├── price.one-time.create.json
+│           │   ├── price.recurring.create.json
+│           │   ├── product.one-time.stack.json
+│           │   └── product.subscription.stack.json
+│           └── iac_tests/       # Filled-out example configs for local testing
+│               ├── product.one-time.stack.json
+│               └── product.subscription.stack.json
+├── .npmrc                       # pnpm settings
+├── package.json                 # Monorepo root
+├── pnpm-workspace.yaml          # Declares packages/* and packages/providers/* as workspaces
+├── tsconfig.base.json           # Shared TypeScript config
+└── turbo.json                   # Turborepo build pipeline
+```
+
+---
+
+## Packages
+
+| Package | Version | Description |
+|---|---|---|
+| `@openiac/core` | `0.1.0` | Engine, CLI entrypoint (`iac`), and shared TypeScript types |
+| `@openiac/provider-stripe` | `0.1.0` | Stripe API resources: `product`, `price` |
+
+---
+
+## Getting Started (Monorepo Development)
+
+### Prerequisites
+
+- Node.js >= 18
+- pnpm >= 9
+
+```bash
+npm install -g pnpm
+```
+
+### Install
+
+```bash
+git clone https://github.com/you/OpenIAC
+cd OpenIAC
+pnpm install
+```
+
+No build step is needed — the engine runs TypeScript directly via [tsx](https://github.com/privatenumber/tsx).
+
+### Useful Commands
+
+```bash
+# Add a dependency to a specific package
+pnpm add stripe --filter @openiac/provider-stripe
+
+# Add a dev dependency to the monorepo root
+pnpm add -Dw typescript
+```
+
+---
+
+## Local Testing
+
+Run the engine locally from the monorepo root using the `iac` script:
+
+```bash
+# Set required env vars for the provider you're testing
+export STRIPE_SECRET_KEY=sk_test_...
+
+# Run a single config
+pnpm iac packages/providers/stripe/iac_tests/product.one-time.stack.json
+
+# Run any JSON config file
+pnpm iac path/to/your/config.json
+```
+
+---
+
+## Configs
+
+A config file targets a single resource action:
+
+```json
+{
+  "$docs": "https://docs.stripe.com/api/products/create",
+  "provider": "stripe",
+  "resource": "product",
+  "action": "create",
+  "params": {
+    "name": "Standard Widget",
+    "description": "A one-time purchase widget",
+    "metadata": {
+      "internal_product_id": "widget-001"
+    }
+  }
+}
+```
+
+**Fields:**
+
+| Field | Required | Description |
+|---|---|---|
+| `$docs` | No | URL to the API documentation. Ignored by the engine, useful for reference. |
+| `provider` | Yes | Which provider package to use (e.g. `stripe` → `@openiac/provider-stripe`) |
+| `resource` | Yes | Which resource on the provider (e.g. `product`, `price`) |
+| `action` | Yes | Which method to call (e.g. `create`, `list`, `retrieve`, `delete`) |
+| `params` | Yes | The parameters passed directly to the action |
+
+---
+
+## Stacks
+
+A stack is an ordered list of steps run sequentially. Each step is a config with an additional `id` field. Here's an example that creates a one-time purchase product with a price:
+
+```json
+{
+  "name": "one-time-product",
+  "steps": [
+    {
+      "$docs": "https://docs.stripe.com/api/products/create",
+      "id": "create_product",
+      "provider": "stripe",
+      "resource": "product",
+      "action": "create",
+      "params": {
+        "name": "Standard Widget",
+        "description": "A one-time purchase widget",
+        "metadata": {
+          "internal_product_id": "widget-001"
+        }
+      }
+    },
+    {
+      "$docs": "https://docs.stripe.com/api/prices/create",
+      "id": "create_price",
+      "provider": "stripe",
+      "resource": "price",
+      "action": "create",
+      "params": {
+        "product": "$context.create_product.id",
+        "unit_amount": 1999,
+        "currency": "usd"
+      }
+    }
+  ]
+}
+```
+
+The engine detects a stack automatically by the presence of a `steps` array — no special flag needed.
+
+---
+
+## Context Passing Between Steps
+
+Each step's output is stored in a shared `context` object under its `id`. Subsequent steps can reference any field from a previous step's output using `$context.<step_id>.<field>`:
+
+```json
+"product": "$context.create_product.id"
+```
+
+This resolves to the `id` field returned by the `create_product` step at runtime.
+
+**Important:** a `$context` reference only works if:
+1. The step `id` matches exactly (e.g. `create_product`)
+2. The referenced field (e.g. `id`) is actually returned by the executor
+
+If the reference can't be resolved, it is left as the literal string `$context.create_product.id` and the API will return a validation error — so double-check both the step ID and the executor's return shape if you see unexpected failures.
+
+---
+
+## Adding a New Resource to an Existing Provider
+
+1. Create `packages/providers/stripe/src/resources/webhook.ts`:
+
+```typescript
+import type { Resource } from "@openiac/core";
+import { stripe } from "../client.js";
+
+export const webhook: Resource = {
+  async create(params: Record<string, unknown>) {
+    const result = await stripe.webhookEndpoints.create(
+      params as Parameters<typeof stripe.webhookEndpoints.create>[0]
+    );
+    return { id: result.id, url: result.url };
+  },
+
+  async list() {
+    const result = await stripe.webhookEndpoints.list();
+    return result.data.map((w) => ({ id: w.id, url: w.url }));
+  },
+
+  async delete(params: { id: string }) {
+    await stripe.webhookEndpoints.del(params.id);
+    return { id: params.id };
+  },
+};
+```
+
+2. Export it from `packages/providers/stripe/src/index.ts`:
+
+```typescript
+export { webhook } from "./resources/webhook.js";
+```
+
+3. Add a template to `packages/providers/stripe/templates/webhook.create.json`.
+
+---
+
+## Adding a New Provider
+
+1. Scaffold the package:
+
+```bash
+cp -r packages/providers/stripe packages/providers/github
+```
+
+2. Update `packages/providers/github/package.json`:
+
+```json
+{
+  "name": "@openiac/provider-github",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@openiac/core": "workspace:*",
+    "@octokit/rest": "^20.0.0"
+  }
+}
+```
+
+3. Replace `src/client.ts` with your SDK client.
+
+4. Add resources under `src/resources/` — each must export an object conforming to the `Resource` type from `@openiac/core`, with async methods like `create`, `list`, `retrieve`, `delete`.
+
+5. Export all resources from `src/index.ts`.
+
+6. Add templates to `templates/`.
+
+7. Add the new provider as a devDependency in the root `package.json` so the engine can resolve it locally:
+
+```json
+"@openiac/provider-github": "workspace:*"
+```
+
+8. Install from monorepo root:
+
+```bash
+pnpm install
+```
+
+---
+
+## Publishing
+
+This repo uses [Changesets](https://github.com/changesets/changesets) to version and publish packages independently. Each package has its own version — you can ship a new version of `@openiac/provider-stripe` without touching `@openiac/core`.
+
+### Workflow
+
+```bash
+# 1. After making changes, create a changeset describing what changed
+pnpm changeset
+# Follow the prompts: select which packages changed, choose patch/minor/major, write a summary
+
+# 2. Version the affected packages (updates package.json versions and CHANGELOG.md)
+pnpm changeset version
+
+# 3. Build and publish to npm
+pnpm publish-all
+```
+
+### CI Publishing (GitHub Actions)
+
+Set `NPM_TOKEN` as a secret in your GitHub repository settings, then uncomment this line in `.npmrc`:
+
+```
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```
+
+---
+
+## Environment Variables
+
+Environment variables are **never loaded by OpenIAC itself**. The engine reads directly from `process.env`, so variables must be present before the CLI runs. How you load them is up to you.
+
+| Variable | Required By | Description |
+|---|---|---|
+| `STRIPE_SECRET_KEY` | `@openiac/provider-stripe` | Your Stripe secret key (`sk_live_...` or `sk_test_...`) |
+
+**Loading options:**
+
+```bash
+# Option 1: export directly in your terminal
+export STRIPE_SECRET_KEY=sk_live_...
+pnpm iac path/to/config.json
+
+# Option 2: inline for a single run
+STRIPE_SECRET_KEY=sk_live_... pnpm iac path/to/config.json
+
+# Option 3: load your .env file first using dotenv-cli
+npx dotenv -e .env -- pnpm iac path/to/config.json
+```

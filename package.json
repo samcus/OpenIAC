@@ -1,0 +1,23 @@
+{
+    "name": "openiac",
+    "private": false,
+    "scripts": {
+        "build": "turbo build",
+        "lint": "turbo lint",
+        "publish-all": "turbo build && changeset publish",
+        "iac": "tsx packages/core/src/engine.ts"
+    },
+    "devDependencies": {
+        "@changesets/cli": "^2.0.0",
+        "@openiac/core": "workspace:*",
+        "@openiac/provider-stripe": "workspace:*",
+        "tsx": "^4.0.0",
+        "turbo": "^2.0.0",
+        "typescript": "^5.0.0"
+    },
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=9"
+    },
+    "packageManager": "pnpm@9.0.0"
+}
