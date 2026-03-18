@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 import fs from "fs";
 import path from "path";
 import type { Config, Stack, Step, Context, Provider } from "./types.js";
@@ -56,13 +56,14 @@ async function runStep(step: Step, context: Context) {
 }
 
 async function loadProvider(name: string): Promise<Provider> {
-    let mod = providerCache.get(name);
-    if (mod) return mod;
+    const cached = providerCache.get(name);
+    if (cached) return cached;
+    let mod: Provider;
     try {
         mod = await import(`@openiac/provider-${name}`);
     } catch (err) {
         if (err instanceof Error && err.message.includes("Cannot find package")) {
-            console.error(`❌ Provider "${name}" not found. Run: pnpm install @openiac/provider-${name}`);
+            console.error(`❌ Provider "${name}" not found. Run: npm install @openiac/provider-${name}`);
         } else {
             console.error(`❌ Failed to load provider "${name}":`, err instanceof Error ? err.message : err);
         }

@@ -29,14 +29,14 @@ function formatPrice(result: {
 export const price: Resource = {
     async create(params: Record<string, unknown>) {
         const result = await stripe.prices.create(
-            params as Parameters<typeof stripe.prices.create>[0]
+            params as unknown as Parameters<typeof stripe.prices.create>[0]
         );
         return formatPrice(result);
     },
 
     async list(params: Record<string, unknown> = {}) {
         const result = await stripe.prices.list(
-            params as Parameters<typeof stripe.prices.list>[0]
+            params as unknown as Parameters<typeof stripe.prices.list>[0]
         );
         return result.data.map((p) => ({
             id: p.id,
@@ -47,16 +47,16 @@ export const price: Resource = {
         }));
     },
 
-    async retrieve(params: { id: string }) {
-        const result = await stripe.prices.retrieve(params.id);
+    async retrieve(params: Record<string, unknown>) {
+        const result = await stripe.prices.retrieve(params.id as string);
         return formatPrice(result);
     },
 
-    async update(params: { id: string; [key: string]: unknown }) {
+    async update(params: Record<string, unknown>) {
         const { id, ...rest } = params;
         const result = await stripe.prices.update(
-            id,
-            rest as Parameters<typeof stripe.prices.update>[1]
+            id as string,
+            rest as unknown as Parameters<typeof stripe.prices.update>[1]
         );
         return formatPrice(result);
     },

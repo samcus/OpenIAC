@@ -1,10 +1,23 @@
 {
   "name": "openiac",
   "version": "0.1.0",
-  "type": "module",
   "description": "OpenIAC with all providers — install once, use everything",
-  "bin": {
-    "iac": "../core/src/engine.ts"
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samuelcuster/OpenIAC",
+    "directory": "packages/openiac"
+  },
+  "homepage": "https://github.com/samuelcuster/OpenIAC",
+  "files": [
+    "LICENSE.md"
+  ],
+  "scripts": {
+    "build": "sh ../../scripts/copy-license.sh"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
     "@openiac/core": "workspace:*",

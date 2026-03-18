@@ -25,14 +25,14 @@ function formatProduct(result: {
 export const product: Resource = {
     async create(params: Record<string, unknown>) {
         const result = await stripe.products.create(
-            params as Parameters<typeof stripe.products.create>[0]
+            params as unknown as Parameters<typeof stripe.products.create>[0]
         );
         return formatProduct(result);
     },
 
     async list(params: Record<string, unknown> = {}) {
         const result = await stripe.products.list(
-            params as Parameters<typeof stripe.products.list>[0]
+            params as unknown as Parameters<typeof stripe.products.list>[0]
         );
         return result.data.map((p) => ({
             id: p.id,
@@ -41,13 +41,13 @@ export const product: Resource = {
         }));
     },
 
-    async retrieve(params: { id: string }) {
-        const result = await stripe.products.retrieve(params.id);
+    async retrieve(params: Record<string, unknown>) {
+        const result = await stripe.products.retrieve(params.id as string);
         return formatProduct(result);
     },
 
-    async delete(params: { id: string }) {
-        const result = await stripe.products.del(params.id);
+    async delete(params: Record<string, unknown>) {
+        const result = await stripe.products.del(params.id as string);
         return { id: result.id, deleted: result.deleted };
     },
 };

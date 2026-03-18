@@ -1,6 +1,6 @@
 {
-    "name": "openiac",
-    "private": false,
+    "name": "openiac-monorepo",
+    "private": true,
     "scripts": {
         "build": "turbo build",
         "lint": "turbo lint",

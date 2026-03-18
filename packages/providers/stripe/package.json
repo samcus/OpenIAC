@@ -1,9 +1,28 @@
 {
   "name": "@openiac/provider-stripe",
   "version": "0.1.0",
+  "description": "Stripe provider for OpenIAC — product, price, and more",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "templates",
+    "LICENSE.md"
+  ],
+  "scripts": {
+    "build": "tsc && sh ../../../scripts/copy-license.sh"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samuelcuster/OpenIAC",
+    "directory": "packages/providers/stripe"
+  },
+  "homepage": "https://github.com/samuelcuster/OpenIAC",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@openiac/core": "workspace:*",
     "stripe": "^20.4.1"

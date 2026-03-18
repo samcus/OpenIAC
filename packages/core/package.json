@@ -1,13 +1,29 @@
 {
   "name": "@openiac/core",
   "version": "0.1.0",
+  "description": "OpenIAC engine, CLI, and shared TypeScript types",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "iac": "src/engine.ts"
+    "iac": "dist/engine.js"
   },
-  "dependencies": {
-    "tsx": "^4.0.0"
-  }
+  "files": [
+    "dist",
+    "LICENSE.md"
+  ],
+  "scripts": {
+    "build": "tsc && sh ../../scripts/copy-license.sh"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samuelcuster/OpenIAC",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/samuelcuster/OpenIAC",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
 }
