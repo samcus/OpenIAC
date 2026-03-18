@@ -1,6 +1,6 @@
 {
   "name": "@openiac/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "OpenIAC engine, CLI, and shared TypeScript types",
   "type": "module",
   "main": "dist/index.js",

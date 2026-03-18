@@ -1,6 +1,6 @@
 {
-  "name": "openiac",
-  "version": "0.1.0",
+  "name": "@openiac/all",
+  "version": "0.2.0",
   "description": "OpenIAC with all providers — install once, use everything",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE.md",
